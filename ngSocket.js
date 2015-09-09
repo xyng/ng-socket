@@ -10,7 +10,7 @@
 
 // Module for provide Socket.io support
 
-(function () {
+define(["socket.io"], function (io) {
   'use strict';
 
   angular.module('ngSocket', [])
@@ -112,4 +112,4 @@
     }
   }
 
-})();
+});
