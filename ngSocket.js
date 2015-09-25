@@ -7,6 +7,7 @@
 */
 
 // Module Copyright (c) 2013 Michael Benford
+// Edited by Daniel Melchior
 
 // Module for provide Socket.io support
 
@@ -41,6 +42,7 @@ define(["socket.io"], function (io) {
 			var socket;
 			
 			var service = {
+				checkToken: checkToken,
 				addListener: addListener,
 				on: addListener,
 				once: addListenerOnce,
@@ -52,7 +54,7 @@ define(["socket.io"], function (io) {
 			return service;
 			////////////////////////////////
 			
-			function initializeSocket() {
+			function initializeSocket(cb) {
 				//Check if socket is undefined
 				if (typeof socket === "undefined") {
 					if (url !== "undefined") {
@@ -60,12 +62,23 @@ define(["socket.io"], function (io) {
 					} else {
 						socket = io.connect();
 					}
+
 					socket.on("connect", function() {
 						socket.emit("authenticate", {
 							token: token
 						});
+						socket.on("tokenCorrect", function() {
+							angularCallback(cb(true));
+						});
+						socket.on("tokenWrong", function() {
+							angularCallback(cb(false));
+						});
 					});
 				}
+			}
+			
+			function checkToken(cb) {
+				initializeSocket(cb);
 			}
 			
 			function angularCallback(callback) {
@@ -83,8 +96,8 @@ define(["socket.io"], function (io) {
 				initializeSocket();
 				
 				if (arguments.length === 2) {
-				scope = null;
-				callback = arguments[1];
+					scope = null;
+					callback = arguments[1];
 				}
 				
 				socket.on(name, angularCallback(callback));
